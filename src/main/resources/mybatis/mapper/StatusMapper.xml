@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.enroll.mapper.StatusMapper">
+
+    <!--void addLog(String content, int status);-->
+    <insert id="addLog">
+        INSERT INTO t_log
+        (log_content, status)
+        VALUES
+        (#{content}, #{status})
+    </insert>
+
+    <!--
+      状态 = 最近一条流程日志。
+      log_time 是秒级精度，同一秒内连续写入多条日志时只按 log_time 排序结果不确定，
+      因此追加 log_id 作为稳定的次序依据，保证"后写入的状态一定生效"。
+    -->
+    <select id="getStatus" resultType="integer">
+        SELECT status
+        FROM t_log
+        ORDER BY log_time DESC, log_id DESC
+        LIMIT 1
+    </select>
+
+    <!--List<Map<String, Object>> getLogList();-->
+    <select id="getLogList" resultType="log">
+        SELECT log_content, DATE_FORMAT(log_time,'%Y-%m-%d %H:%i:%s') AS log_time
+        FROM t_log
+        ORDER BY log_time, log_id
+    </select>
+</mapper>
