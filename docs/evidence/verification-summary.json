@@ -1,0 +1,63 @@
+{
+  "project": "parallel-volunteer-admission-system",
+  "verifiedAt": "2026-09-24",
+  "environment": {
+    "jdk": "17.0.3.1",
+    "maven": "IDEA bundled Maven 3 (Spring Boot 2.7.18)",
+    "database": "MySQL 8.0.41",
+    "operatingSystem": "Windows"
+  },
+  "automatedTests": {
+    "unitTests": 8,
+    "integrationTests": 2,
+    "failures": 0,
+    "errors": 0,
+    "command": "mvn test (ENROLL_IT=true)"
+  },
+  "endToEndRun": {
+    "entry": "http://127.0.0.1:8888/admission/index.html",
+    "steps": [
+      "登录 -> code 000",
+      "上传招生计划 -> code 000",
+      "上传考生志愿 -> code 000, status=2",
+      "执行录取 -> code 000, status=3, elapsedMs=3466",
+      "执行调剂 -> code 000, status=4, elapsedMs=220",
+      "导出录取结果 -> HTTP 200, 311614 bytes",
+      "导出退档队列 -> HTTP 200, 17975 bytes"
+    ],
+    "data": {
+      "departments": 17,
+      "majors": 49,
+      "students": 6862,
+      "planTotal": 6666,
+      "admittedByWill": 6409,
+      "admittedByAdjust": 257,
+      "waitingForAdjust": 0,
+      "exited": 196,
+      "majorsExceedingPlan": 0
+    },
+    "consistencyChecks": [
+      {
+        "name": "noOverEnrollment",
+        "expression": "count(t_major where realistic_student_count > plan_student_count) = 0",
+        "passed": true
+      },
+      {
+        "name": "planFullyFilled",
+        "expression": "admittedByWill + admittedByAdjust = planTotal (6409 + 257 = 6666)",
+        "passed": true
+      },
+      {
+        "name": "exitCountMatchesRemainder",
+        "expression": "students - planTotal = exited (6862 - 6666 = 196)",
+        "passed": true
+      },
+      {
+        "name": "noPendingStudentAfterAdjust",
+        "expression": "count(t_student where accepted_type = 0) = 0",
+        "passed": true
+      }
+    ]
+  },
+  "screenshotsSource": "images/ (界面截图来自项目原始版本)"
+}
