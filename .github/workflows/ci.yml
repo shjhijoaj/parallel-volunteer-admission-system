@@ -1,56 +1,45 @@
-name: ci
-
-on:
-  push:
-    branches: [main, master]
-  pull_request:
-  workflow_dispatch:
-
+name: Course Platform CI
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
 jobs:
-  unit-test:
-    name: 单元测试（无需数据库）
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 8
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: temurin
           cache: maven
-      - name: Run unit tests
-        run: mvn -B test
-
-  integration-test:
-    name: 集成测试（MySQL 8）
-    runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:8.0
+      - run: mvn -B -ntp package
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.55.0 && npx playwright install --with-deps chromium
+      - name: Start isolated test app
+        run: |
+          mkdir -p test-results
+          java -Duser.timezone=Asia/Shanghai -jar target/parallel-volunteer-admission-system-2.0.0.jar > test-results/server.log 2>&1 &
+          for i in $(seq 1 60); do curl -fsS http://127.0.0.1:8089/api/health && exit 0; sleep 1; done
+          cat test-results/server.log
+          exit 1
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: enroll_it
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=20
-    env:
-      ENROLL_IT: "true"
-      MYSQL_HOST: 127.0.0.1
-      MYSQL_PORT: "3306"
-      MYSQL_DATABASE: enroll_it
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 8
-        uses: actions/setup-java@v4
+          PORT: '8089'
+          COURSE_DB_URL: 'jdbc:h2:file:./test-results/course;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_ON_EXIT=FALSE'
+          BOOTSTRAP_ADMIN_PASSWORD: CiTestOnlyPassword1234
+          CREDENTIAL_FILE: ./test-results/admin.txt
+      - run: node tools/browser-acceptance.cjs
+        env:
+          COURSE_ADMIN_PASSWORD: CiTestOnlyPassword1234
+      - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          java-version: '8'
-          distribution: temurin
-          cache: maven
-      - name: Run integration tests
-        run: mvn -B test
+          name: course-test-results
+          path: |
+            target/surefire-reports/
+            test-results/screenshots/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: course-selection-platform-jar
+          path: target/parallel-volunteer-admission-system-2.0.0.jar

@@ -40,3 +40,7 @@
 | Vue 2 / Element UI / ECharts | MIT / MIT / Apache License 2.0 |
 
 感谢上述开源项目与原作者提供的基础实现。
+
+## 2.0.0 课程平台
+
+当前运行界面位于 `src/main/resources/course-ui/`，使用 Vue 3.5.13（许可证随 vendor 目录保存），新增学生账号、课程批次、报名与公示业务。原分配内核保留，通过适配层复用；历史来源说明继续适用。个人维护者：宋浩；Codex 辅助实现、测试与文档整理。旧 Vue 2 静态资源不是当前页面入口。
