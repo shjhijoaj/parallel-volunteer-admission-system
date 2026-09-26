@@ -286,8 +286,6 @@ mvn test
 
 | 文档 | 内容 |
 | --- | --- |
-| [`项目讲解与面试问答.md`](项目讲解与面试问答.md) | 30 秒 / 2 分钟 / 5 分钟讲法、架构讲解、面试问答 |
-| [`核心基础知识与名词解释.md`](核心基础知识与名词解释.md) | 平行志愿规则、Spring Boot、MyBatis、MySQL、EasyExcel 基础概念 |
 | [`docs/architecture.md`](docs/architecture.md) | 分层结构、录取状态机与数据流 |
 | [`docs/data-model.md`](docs/data-model.md) | 表结构、字段含义与索引设计 |
 | [`docs/api.md`](docs/api.md) | 接口列表、参数与返回结构 |
