@@ -303,8 +303,7 @@ mvn test
 | [EasyExcel](https://github.com/alibaba/easyexcel) | Excel 批量导入与导出 |
 | [Vue.js](https://vuejs.org/) / [Element UI](https://element.eleme.io/) / [ECharts](https://echarts.apache.org/) | 管理台界面与图表 |
 
-本项目由课程设计演化而来：原始版本来自公开的平行志愿录取系统课程设计（见 [`CREDITS.md`](CREDITS.md)），
-后续的工程化改造、规则引擎抽取、缺陷修复、测试与文档由仓库维护者完成。
+
 第三方组件按各自许可证使用。
 
 ## License
