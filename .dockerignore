@@ -1,0 +1,8 @@
+.git
+target
+data
+test-results
+node_modules
+dist
+.env
+*.zip

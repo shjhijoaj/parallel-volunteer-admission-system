@@ -10,15 +10,16 @@
     </parent>
     <groupId>org.enroll</groupId>
     <artifactId>parallel-volunteer-admission-system</artifactId>
-    <version>1.0.0</version>
-    <name>parallel-volunteer-admission-system</name>
-    <description>平行志愿录取系统：Spring Boot + MyBatis + MySQL + Vue 的录取业务与数据统计</description>
+    <version>2.0.0</version>
+    <name>course-selection-platform</name>
+    <description>课选：实训课程报名与名额分配平台</description>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
     </properties>
 
     <dependencies>
+        <dependency><groupId>com.h2database</groupId><artifactId>h2</artifactId><scope>runtime</scope></dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>

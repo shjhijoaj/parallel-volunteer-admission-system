@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
 
-@MapperScan("org.enroll.mapper")
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+@MapperScan("org.course.persistence")
+@SpringBootApplication(scanBasePackages = "org.course")
 public class EnrollSystemApplication {
 
     public static void main(String[] args) {

@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @Transactional(isolation = Isolation.DEFAULT, propagation = Propagation.REQUIRED)
@@ -43,24 +44,43 @@ public class ExcelServiceImpl implements IExcelService {
 
     public void ReadMajorExcel(MultipartFile file) throws IOException {
         Integer status = statusMapper.getStatus();
+        requireStatus(status, EnrollStatus.START, "招生计划");
+        validateExcelUpload(file, "招生计划");
+        // 先完成状态和文件校验，再清理旧数据，避免非法重复导入误删当前数据。
         majorMapper.resetTable();
         studentMapper.resetStudent();
-        if (status != null && status != EnrollStatus.START.ordinal()){
-            throw new RuntimeException("现在不能导入招生计划文件");
-        }
         EasyExcel.read(file.getInputStream(), ExcelMajor.class, new ReadMajorListener(majorMapper, departmentMapper)).sheet().doRead();
         statusMapper.addLog("导入专业招生计划文件", EnrollStatus.WITHOUT_STUDENT.ordinal());
     }
 
     public void ReadStudentExcel(MultipartFile file) throws IOException {
         Integer status = statusMapper.getStatus();
-        if (status != EnrollStatus.WITHOUT_STUDENT.ordinal()){
-            throw new RuntimeException("现在不能导入考生志愿文件");
-        }
+        requireStatus(status, EnrollStatus.WITHOUT_STUDENT, "考生志愿");
+        validateExcelUpload(file, "考生志愿");
         studentMapper.resetTable();
         majorMapper.resetMajor();
         EasyExcel.read(file.getInputStream(), ExcelStudent.class,new ReadStudentListener(studentMapper)).sheet().doRead();
         statusMapper.addLog("导入考生志愿文件", EnrollStatus.FILE_READY.ordinal());
+    }
+
+    private void requireStatus(Integer status, EnrollStatus expected, String fileType) {
+        if (status == null || status != expected.ordinal()) {
+            throw new IllegalStateException("当前流程状态不能导入" + fileType + "文件");
+        }
+    }
+
+    private void validateExcelUpload(MultipartFile file, String fileType) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException(fileType + "文件不能为空");
+        }
+        String filename = file.getOriginalFilename();
+        String lowerName = filename == null ? "" : filename.toLowerCase(Locale.ROOT);
+        if (!lowerName.endsWith(".xlsx") && !lowerName.endsWith(".xls")) {
+            throw new IllegalArgumentException(fileType + "文件必须是 .xlsx 或 .xls 格式");
+        }
+        if (file.getSize() > 10 * 1024 * 1024L) {
+            throw new IllegalArgumentException(fileType + "文件不能超过 10 MB");
+        }
     }
 
     @Override
